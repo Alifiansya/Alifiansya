@@ -48,12 +48,12 @@ int main(){
 	}
 	
 	
-	for(int i = 0; i < maze_size; i++){
+	for(int i = maze_size-1; i >= 0  ; i--){
 		for(int j = 0; j < maze_size; j++){
-			cout << maze[i][j];
+			cout << maze[j][i];
 		}
 		cout << endl;
-	}
-	
+	}	
 }
+
 
