@@ -146,10 +146,11 @@ struct LinkedList
     {
         if(empty()) return -1;
         int i = 0;
-        for(Node *p = head; p -> data != data; p = p -> next)
-        {
+        for(Node *p = head; ; p = p -> next)
+        {if(p == NULL) return -1;
+        if(p -> data == data) break;
             i++;
-            if(p == NULL) return -1;
+            
         }
         return size-1 - i;
     }
@@ -195,6 +196,15 @@ struct LinkedList
         for(Node *p = head; p != NULL; p = p -> next)
             memSize += sizeof(p -> data);
         return memSize;
+    }
+
+    bool intersecting(LinkedList<T> &data)
+    {
+        for(Node *p = head; p != NULL; p = p -> next)
+            for(Node *q = data.head; q != NULL; q = q -> next)
+                if(p -> data == q -> data)
+                    return true;
+        return false;
     }
 
     bool isSame(LinkedList<T> &data)
@@ -361,8 +371,11 @@ class Graph
 
 //=================================================================================
 //===================================== FIND GROUP ================================
+    LinkedList<LinkedList<int>>* getGroups;
+    
     int getNumGroup()
     {
+        cout << count << endl;
         LinkedList<LinkedList<int>> groups;
         LinkedList<int> grouped;
         LinkedList<int> users;
@@ -372,10 +385,13 @@ class Graph
             if(grouped.findIndex(i) == -1)
             {
                 cout << i;
-                
-
                 dfs(i, 0, users);
                 dfs(i, 1, users);
+                if(users.intersecting(grouped))
+                {
+                    users.clear();
+                    continue;
+                }
                 users.print();
                 users.deleteDupe();
                 grouped.concat(users);
@@ -383,7 +399,7 @@ class Graph
                 users.clear();
             }     
         }
-
+        getGroups = &groups;
         return groups.size;
     }
 
@@ -500,7 +516,7 @@ int main()
         g.printAdjMatrix();
         cout << g.mostFollowed() << endl;
         // g.count_paths(g.findIndex("graphy"), g.findIndex("hadiyan"), 6).print();
-        cout << g.minRetweetCount(g.findIndex("graphy"), g.findIndex("hadiyan"));
+        cout << g.minRetweetCount(g.findIndex("graphy"), g.findIndex("hadiyan")) << endl;
         cout << g.getNumGroup();
     }
     catch(const char *msg){
