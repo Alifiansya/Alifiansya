@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 template <typename T>
@@ -114,6 +115,7 @@ struct LinkedList
                     hlp -> next = q -> next;
                     delete q;
                     q = hlp -> next;
+                    size--;
                 }
                 else
                 {
@@ -137,8 +139,10 @@ struct LinkedList
     {
         if(index > size || index < 0) throw "Index not found 404!";
         Node *p = head;
-        for(int i = 0; i < size-index-1; i++) 
+        for(int i = 0; i < size-index-1; i++){
+            if(p == NULL) throw " "; 
             p = p -> next;
+        }
         return p -> data;
     }
 
@@ -238,6 +242,13 @@ struct LinkedList
     }
 };
 
+void tokenize(string str, const char delim, LinkedList<string> &list){
+    stringstream ss(str);
+    string s;
+    while (getline(ss, s, delim)) {
+        list.push(s);
+    }
+}
 
 class Graph
 {
@@ -371,36 +382,83 @@ class Graph
 
 //=================================================================================
 //===================================== FIND GROUP ================================
-    LinkedList<LinkedList<int>>* getGroups;
-    
+    LinkedList<string> getGroups;
+
+    LinkedList<LinkedList<string>*> topicDetection()
+    {
+        getNumGroup();
+        LinkedList<LinkedList<string>*> data;
+        LinkedList<string> idOrangStr;
+        LinkedList<int> idOrangInt;
+        LinkedList<string>* minat = new LinkedList<string>;
+        for(int i = 0; i < getGroups.size; i++)
+        {
+            tokenize(getGroups.at(i), ',', idOrangStr);
+            for(int sz = 0; sz < idOrangStr.size; sz++)
+                idOrangInt.push(stoi(idOrangStr.at(i)));
+            idOrangStr.clear();
+            
+            for(int j1 = 0; j1 < idOrangInt.size; j1++)
+            {
+                for(int j2 = 0; j2 < idOrangInt.size; j2++)
+                {
+                    for(int k1 = 0; k1 < 3; k1++)
+                    {
+                        for(int k2 = 0; k2 < 3; k2++)
+                        {
+                            if(users.at(idOrangInt.at(j1))->minat[k1] == users.at(idOrangInt.at(j2))->minat[k2])
+                            {
+                                minat->push(users.at(idOrangInt.at(j1)) -> minat[k1]);
+                            }
+                        }
+                    }
+                }
+            }
+            idOrangInt.clear();
+            minat->deleteDupe();
+            minat->print();
+            data.push(minat);
+        }
+        return data;
+    }
+
     int getNumGroup()
     {
-        cout << count << endl;
-        LinkedList<LinkedList<int>> groups;
+        getGroups.clear();
+        // cout << count << endl;
+        // LinkedList<LinkedList<int>*> groups;
         LinkedList<int> grouped;
-        LinkedList<int> users;
+        LinkedList<int> userindex;
 
         for(int i = 0; i < count; i++)
         {
             if(grouped.findIndex(i) == -1)
             {
-                cout << i;
-                dfs(i, 0, users);
-                dfs(i, 1, users);
-                if(users.intersecting(grouped))
+                // cout << i;
+                dfs(i, 0, userindex);
+                dfs(i, 1, userindex);
+                if(userindex.intersecting(grouped))
                 {
-                    users.clear();
+                    userindex.clear();
                     continue;
                 }
-                users.print();
-                users.deleteDupe();
-                grouped.concat(users);
-                groups.push(users);
-                users.clear();
+                // userindex.print();
+                userindex.deleteDupe();
+                grouped.concat(userindex);
+                string ids;
+                for(int i = 0; i < userindex.size; i++)
+                {
+                    ids += to_string(userindex.at(i));
+                    if(i != userindex.size-1)
+                        ids += ",";
+                }
+                getGroups.push(ids);
+                getGroups.print();
+                userindex.clear();
             }     
         }
-        getGroups = &groups;
-        return groups.size;
+        // getGroups = &groups;
+        return getGroups.size;
     }
 
     int unchekedUsers(int v, bool checked[])
@@ -479,20 +537,20 @@ class Graph
 int main()
 {
     Graph g;
-    g.addVertex("graphy", "meme", "buku", "sas");//v1
-    g.addVertex("mario", "meme", "buku", "sas");//v2
-    g.addVertex("zaka", "meme", "buku", "sas");//v3
-    g.addVertex("rozi", "meme", "buku", "sas");//v4
-    g.addVertex("hadiyan", "meme", "buku", "sas");//v5
-    g.addVertex("yaya", "meme", "buku", "sas");//v6
-    g.addVertex("heru", "meme", "buku", "sas");//v1
+    g.addVertex("graphy", "baca", "makan", "memancing");//v1
+    g.addVertex("mario", "makan", "baca", "bersepeda");//v2
+    g.addVertex("zaka", "makan", "menonton", "baca");//v3
+    g.addVertex("rozi", "makan", "tidur", "baca");//v4
+    g.addVertex("hadiyan", "baca", "bersepeda", "menonton");//v5
+    g.addVertex("yaya", "makan", "menulis", "belajar");//v6
+    g.addVertex("heru", "bersepeda", "baca", "tidur");//v1
 
-    g.addVertex("wini", "meme", "buku", "sas");//v2
-    g.addVertex("biti", "meme", "buku", "sas");//v3
-    g.addVertex("tini", "meme", "buku", "sas");//v4
+    g.addVertex("wini", "memancing", "baca", "tidur");//v2
+    g.addVertex("biti", "memancing", "menonton", "makan");//v3
+    g.addVertex("tini", "mengembara", "memancing", "tidur");//v4
 
-    g.addVertex("dolly", "meme", "buku", "sas");//v5
-    g.addVertex("bolly", "meme", "buku", "sas");//v6
+    g.addVertex("dolly", "baca", "menonton", "makan");//v5
+    g.addVertex("bolly", "baca", "tidur", "makan");//v6
     try{
         g.connect("graphy", "mario");
         g.connect("mario", "zaka");
@@ -518,6 +576,12 @@ int main()
         // g.count_paths(g.findIndex("graphy"), g.findIndex("hadiyan"), 6).print();
         cout << g.minRetweetCount(g.findIndex("graphy"), g.findIndex("hadiyan")) << endl;
         cout << g.getNumGroup();
+        // LinkedList<LinkedList<string>> data = g.topicDetection();
+        // for(int i = 0; i < data.size; i++)
+        // {
+        //     data.at(i).print();
+        // }
+        g.topicDetection();
     }
     catch(const char *msg){
         cerr << msg;
