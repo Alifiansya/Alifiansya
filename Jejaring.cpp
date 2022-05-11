@@ -295,7 +295,7 @@ LinkedList<string> checkListFreqDataStr(LinkedList<string> data)
     // noDupe.print();
     LinkedList<int> noDupeCount, dataMaxId;
     noDupe.deleteDupe();
-    // data.print();
+    // noDupe.print();
     int count;
     for(int i = 0; i < noDupe.size; i++)
     {
@@ -305,6 +305,7 @@ LinkedList<string> checkListFreqDataStr(LinkedList<string> data)
                 count++;
         noDupeCount.push(count);
     }
+    // noDupeCount.print();
 
     int max = noDupeCount.findMax();
     for(int i = 0; i < noDupeCount.size; i++)
@@ -490,48 +491,6 @@ class Graph
         
     }
 
-    // LinkedList<LinkedList<string>*> topicDetection()
-    // {
-    //     getNumGroup();
-    //     LinkedList<LinkedList<string>*> data;
-    //     LinkedList<string> idOrangStr;
-    //     LinkedList<int> idOrangInt;
-    //     LinkedList<string> mintot;
-    //     LinkedList<string>* minat = new LinkedList<string>;
-    //     for(int i = 0; i < getGroups.size; i++)
-    //     {
-    //         tokenize(getGroups.at(i), ',', idOrangStr);
-    //         for(int sz = 0; sz < idOrangStr.size; sz++)
-    //             idOrangInt.push(stoi(idOrangStr.at(i)));
-    //         idOrangStr.clear();
-            
-    //         for(int j1 = 0; j1 < idOrangInt.size; j1++)
-    //         {
-    //             for(int j2 = 0; j2 < idOrangInt.size; j2++)
-    //             {
-    //                 for(int k1 = 0; k1 < 3; k1++)
-    //                 {
-    //                     for(int k2 = 0; k2 < 3; k2++)
-    //                     {
-    //                         if(users.at(idOrangInt.at(j1))->minat[k1] == users.at(idOrangInt.at(j2))->minat[k2])
-    //                         {
-    //                             minat->push(users.at(idOrangInt.at(j1)) -> minat[k1]);
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         idOrangInt.clear();
-    //         minat -> deleteDupe();
-    //         cout << minat->size;
-    //         minat -> print();
-    //         mintot = minat->mostFreqData();
-    //         mintot.print();
-    //         data.push(minat);
-    //     }
-    //     return data;
-    // }
-
     int getNumGroup()
     {
         getGroups.clear();
@@ -549,6 +508,32 @@ class Graph
                 dfs(i, 1, userindex);
                 if(userindex.intersecting(grouped))
                 {
+                    for(int j = 0; j < getGroups.size; j++)
+                    {
+                        LinkedList<int> groupsInt;
+                        LinkedList<string> groupsStr;
+                        // cout << getGroups.at(j)<< endl;
+                        tokenize(getGroups.at(j), ',', groupsStr);
+                        // groupsStr.print();
+                        for(int k = 0; k < groupsStr.size; k++)
+                            groupsInt.push(stoi(groupsStr.at(k)));
+                        // groupsInt.print();
+                        if(userindex.intersecting(groupsInt))
+                        {
+                            string ids;
+                            userindex.concat(groupsInt);
+                            userindex.deleteDupe();
+                            // userindex.print();
+                            for(int k = 0; k < userindex.size; k++)
+                            {
+                                ids += to_string(userindex.at(k));
+                                if(k != userindex.size-1)
+                                    ids += ",";
+                            }
+                            // cout << ids << "ffq" << endl;
+                            getGroups.nodeAt(j) ->data = ids;
+                        }
+                    }
                     userindex.clear();
                     continue;
                 }
@@ -651,14 +636,14 @@ class Graph
 //     g.addVertex("rozi", "makan", "tidur", "baca");//v4
 //     g.addVertex("hadiyan", "baca", "bersepeda", "menonton");//v5
 //     g.addVertex("yaya", "makan", "menulis", "belajar");//v6
-//     g.addVertex("heru", "bersepeda", "baca", "tidur");//v1
+//     g.addVertex("heru", "bersepeda", "baca", "makan");//v1
 
 //     g.addVertex("wini", "memancing", "baca", "tidur");//v2
 //     g.addVertex("biti", "memancing", "menonton", "makan");//v3
 //     g.addVertex("tini", "mengembara", "memancing", "tidur");//v4
 
 //     g.addVertex("dolly", "baca", "menonton", "makan");//v5
-//     g.addVertex("bolly", "baca", "tidur", "makan");//v6
+//     g.addVertex("bolly", "baca", "tidur", "memancing");//v6
 //     try{
 //         g.connect("graphy", "mario");
 //         g.connect("mario", "zaka");
@@ -682,8 +667,8 @@ class Graph
 //         g.printAdjMatrix();
 //         cout << g.mostFollowed() << endl;
 //         // g.count_paths(g.findIndex("graphy"), g.findIndex("hadiyan"), 6).print();
-//         cout << g.minRetweetCount(g.findIndex("graphy"), g.findIndex("hadiyan")) << endl;
-//         cout << g.getNumGroup();
+//         cout << g.minRetweetCount("graphy", "hadiyan") << endl;
+//         // cout << g.getNumGroup();
 //         // LinkedList<LinkedList<string>> data = g.topicDetection();
 //         // for(int i = 0; i < data.size; i++)
 //         // {
@@ -798,5 +783,5 @@ int main()
         cout << endl;
     }
 
-    twitty.printAdjMatrix();
+    // twitty.printAdjMatrix();
 }
