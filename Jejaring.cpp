@@ -11,18 +11,22 @@ struct Queue{
     QNode *front = NULL, *rear = NULL;
     int size = 0;
 
-    bool empty(){
+    bool empty()
+    {
         return front == NULL;
     }
 
-    void enqueue(string data){
+    void enqueue(string data)
+    {
         QNode *newNode = new QNode;
         newNode -> data = data;
-        if(empty()){   
+        if(empty())
+        {   
             newNode -> next = newNode -> prev = NULL;
             front = rear = newNode;
         }
-        else{
+        else
+        {
             newNode -> next = NULL;
             newNode -> prev = rear;
             rear = rear -> next = newNode;
@@ -30,19 +34,22 @@ struct Queue{
         size++;
     }
 
-    string dequeue(){
-        if(empty()) cerr << "Queue kosong, tidak dapat di dequeue.";
-        else{
+    string dequeue()
+    {
+        if(empty()) 
+            throw "Queue kosong, tidak dapat di dequeue.";
+        else
+        {
             string tmp = front -> data;
             QNode *del = front;
 
             front = front -> next;
             if(front != NULL) front -> prev = NULL;
             else rear = front;
-
             size--;
             return tmp;
         }
+        return " ";
     }
 };
 
@@ -202,6 +209,24 @@ struct LinkedList
         }
         return size-1 - i;
     }
+    
+    LinkedList<int> findMaxIndexDupe()
+    {
+        if(empty()) throw "List empty! cannot find max.";
+        Node *p = head;
+        int i = 0;
+        LinkedList<int> index;
+        for(Node *q = head; q != NULL; q = q -> next)
+            if(p -> data < q -> data) p = q;
+
+        for(Node *q = head; q != NULL; q = q -> next)
+        {
+            if(p -> data == q -> data)
+                index.push(size - i - 1);
+            i++;
+        }
+        return index;
+    }
 
     T findMax()
     {
@@ -230,7 +255,7 @@ struct LinkedList
         string tmp;
         for(Node *p = head; p != NULL; p = p -> next)
             for(Node *q = p; q != NULL; q = q -> next)
-                if(p -> data.compare(q -> data) > 0)
+                if(p -> data.compare(q -> data) < 0)
                 {
                     tmp = p -> data;
                     p -> data = q -> data;
@@ -289,14 +314,14 @@ struct LinkedList
 LinkedList<string> checkListFreqDataStr(LinkedList<string> data)
 {
     LinkedList<string> result, noDupe;
+
     for(int i = 0; i < data.size; i++)
         noDupe.push(data.at(i));
-    // data.print();
-    // noDupe.print();
+
     LinkedList<int> noDupeCount, dataMaxId;
     noDupe.deleteDupe();
-    // noDupe.print();
     int count;
+    
     for(int i = 0; i < noDupe.size; i++)
     {
         count = 0;
@@ -317,6 +342,7 @@ LinkedList<string> checkListFreqDataStr(LinkedList<string> data)
     
     return result;
 }
+
 
 void tokenize(string str, const char delim, LinkedList<string> &list){
     stringstream ss(str);
@@ -397,12 +423,19 @@ class Graph
         return edgeCount;
     }
 
-    string mostFollowed()
+    void mostFollowed()
     {
         LinkedList<int> ll;
         for(int i = 0; i < count; i++)
             ll.push(inEdgesCount(i));
-        return users.at(ll.findIndex(ll.findMax()))->username;
+        LinkedList<int> index = ll.findMaxIndexDupe();
+        for(int i = 0; i < index.size; i++)
+        {
+            cout << users.at(index.at(i)) -> username;
+            if(i != index.size-1)
+                cout << ",";
+        }
+        cout << endl;
     }
 
 // ==================================== MINRETWEET ====================================
@@ -465,10 +498,13 @@ class Graph
     {
         // string printAllData;
         getNumGroup();
+        LinkedList<string> getTopics;
+        
         for (int i = 0; i < getGroups.size; i++)
         {
             LinkedList<string> groupIndexStr;
             LinkedList<int> groupIndexInt;
+            string topics;
             tokenize(getGroups.at(i), ',', groupIndexStr);
             for(int id = 0; id < groupIndexStr.size; id++)
                 groupIndexInt.push(stoi(groupIndexStr.at(id)));
@@ -481,21 +517,21 @@ class Graph
 
             for(int i = 0; i < groupTopic.size; i++)
             {
-                cout << groupTopic.at(i);
+                topics += groupTopic.at(i);
                 if(i != groupTopic.size-1)
-                    cout << ',';
+                    topics += ",";
             }
-            cout << endl;
-            
+            topics += "\n";
+            getTopics.push(topics);
         }
-        
+        getTopics.strSortList();
+        for(int i = 0; i < getTopics.size; i++)
+            cout << getTopics.at(i);
     }
 
     int getNumGroup()
     {
         getGroups.clear();
-        // cout << count << endl;
-        // LinkedList<LinkedList<int>*> groups;
         LinkedList<int> grouped;
         LinkedList<int> userindex;
 
@@ -503,7 +539,6 @@ class Graph
         {
             if(grouped.findIndex(i) == -1)
             {
-                // cout << i;
                 dfs(i, 0, userindex);
                 dfs(i, 1, userindex);
                 if(userindex.intersecting(grouped))
@@ -512,32 +547,26 @@ class Graph
                     {
                         LinkedList<int> groupsInt;
                         LinkedList<string> groupsStr;
-                        // cout << getGroups.at(j)<< endl;
                         tokenize(getGroups.at(j), ',', groupsStr);
-                        // groupsStr.print();
                         for(int k = 0; k < groupsStr.size; k++)
                             groupsInt.push(stoi(groupsStr.at(k)));
-                        // groupsInt.print();
                         if(userindex.intersecting(groupsInt))
                         {
                             string ids;
                             userindex.concat(groupsInt);
                             userindex.deleteDupe();
-                            // userindex.print();
                             for(int k = 0; k < userindex.size; k++)
                             {
                                 ids += to_string(userindex.at(k));
                                 if(k != userindex.size-1)
                                     ids += ",";
                             }
-                            // cout << ids << "ffq" << endl;
                             getGroups.nodeAt(j) ->data = ids;
                         }
                     }
                     userindex.clear();
                     continue;
                 }
-                // userindex.print();
                 userindex.deleteDupe();
                 grouped.concat(userindex);
                 string ids;
@@ -548,11 +577,9 @@ class Graph
                         ids += ",";
                 }
                 getGroups.push(ids);
-                // getGroups.print();
                 userindex.clear();
             }     
         }
-        // getGroups = &groups;
         return getGroups.size;
     }
 
@@ -572,115 +599,31 @@ class Graph
         return -1;
     }
 
-    void dfs(int start, bool reverse, LinkedList<int> &users) // depth-first search
+    void dfs(int start, bool reverse, LinkedList<int> &users)
     {  
         bool check[count] = {false};
         Stack<int> st;
-        // cout << users.at(v)->username; // display it
         users.push(start);
 
-        st.push(start); // push it
-        while( !st.empty() ) // until stack empty,
+        st.push(start);
+        while( !st.empty() )
         {
             int v;
             if(!reverse)
                 v = unchekedUsers(st.peek(), check);
             else
                 v = rUnchekedUsers(st.peek(), check);
-            if(v == -1) // if no such vertex,
+            if(v == -1)
                 st.pop();
-            else // if it exists,
+            else
             {
                 check[v] = true;
-                // cout << users.at(v)->username; // display it
                 users.push(v);
-                st.push(v); // push it
+                st.push(v);
             }
-        } // end while
-    }
-//==================================================================================
-    void printAdjMatrix()
-    {   
-        string uname;
-        std::cout << "[] |  ";
-        for(int i = 0; i < count; i++){
-            uname = users.at(i) -> username;
-            std:: cout << uname[0];
-            std::cout << "   ";
-        }
-        std::cout << std::endl; 
-        
-        for(int i = 0; i < count; i++)
-            std::cout << "----";
-        std::cout << "----";
-        std::cout << std::endl;
-        for(int i = 0; i < count; i++)
-        {
-            std::cout << users.at(i) -> username[0] << "  |  ";
-            for(int j = 0; j < count; j++)
-            {
-                std::cout << adjMatrix.at(i)->at(j) << "   ";
-            }
-            std::cout << std::endl << std::endl;
         }
     }
-
 };
-
-// int main()
-// {
-//     Graph g;
-//     g.addVertex("graphy", "baca", "makan", "memancing");//v1
-//     g.addVertex("mario", "makan", "baca", "bersepeda");//v2
-//     g.addVertex("zaka", "makan", "menonton", "baca");//v3
-//     g.addVertex("rozi", "makan", "tidur", "baca");//v4
-//     g.addVertex("hadiyan", "baca", "bersepeda", "menonton");//v5
-//     g.addVertex("yaya", "makan", "menulis", "belajar");//v6
-//     g.addVertex("heru", "bersepeda", "baca", "makan");//v1
-
-//     g.addVertex("wini", "memancing", "baca", "tidur");//v2
-//     g.addVertex("biti", "memancing", "menonton", "makan");//v3
-//     g.addVertex("tini", "mengembara", "memancing", "tidur");//v4
-
-//     g.addVertex("dolly", "baca", "menonton", "makan");//v5
-//     g.addVertex("bolly", "baca", "tidur", "memancing");//v6
-//     try{
-//         g.connect("graphy", "mario");
-//         g.connect("mario", "zaka");
-//         g.connect("mario", "rozi");
-//         g.connect("heru", "yaya");
-//         g.connect("yaya", "heru");
-//         g.connect("heru", "rozi");
-//         g.connect("yaya", "rozi");
-//         g.connect("zaka", "rozi");
-//         g.connect("zaka", "hadiyan");
-//         g.connect("hadiyan", "zaka");
-
-//         g.connect("biti", "wini");
-//         g.connect("wini", "biti");
-//         g.connect("biti", "tini");
-//         g.connect("tini", "wini");
-
-//         g.connect("dolly", "bolly");
-//         g.connect("bolly", "dolly");
-        
-//         g.printAdjMatrix();
-//         cout << g.mostFollowed() << endl;
-//         // g.count_paths(g.findIndex("graphy"), g.findIndex("hadiyan"), 6).print();
-//         cout << g.minRetweetCount("graphy", "hadiyan") << endl;
-//         // cout << g.getNumGroup();
-//         // LinkedList<LinkedList<string>> data = g.topicDetection();
-//         // for(int i = 0; i < data.size; i++)
-//         // {
-//         //     data.at(i).print();
-//         // }
-//         // g.topicDetection();
-//         g.printGroupTopic();
-//     }
-//     catch(const char *msg){
-//         cerr << msg;
-//     }
-// }
 
 int main()
 {
@@ -723,65 +666,59 @@ int main()
 
         if(firstQueryData == "insert"){
             if(queryData.size != 5)
+                cerr << "WRONG FORMAT" << endl;
+            else
             {
-                cout << "WRONG FORMAT" << endl;
-                continue;
+                string username = queryData.at(1);
+                twitty.addVertex(username, queryData.at(2), queryData.at(3), queryData.at(4));
+                cout << username << " inserted" << endl;
             }
-            string username = queryData.at(1);
-            twitty.addVertex(username, queryData.at(2), queryData.at(3), queryData.at(4));
-            cout << username << " inserted";
+            continue;
         }
 
         if(firstQueryData == "connect"){
             if(queryData.size != 3)
+                cerr << "WRONG FORMAT" << endl;
+            else
             {
-                cout << "WRONG FORMAT" << endl;
-                continue;
+                string user1 = queryData.at(1), user2 = queryData.at(2);
+                twitty.connect(user1, user2);
+                cout << "connect " << user1 << ' ' << user2 << " success" << endl;
             }
-            string user1 = queryData.at(1), user2 = queryData.at(2);
-            twitty.connect(user1, user2);
-            cout << "connect " << user1 << ' ' << user2 << " success";
+            continue;
         }    
         
         if(firstQueryData == "mostfollowed"){
             if(queryData.size != 1)
-            {
-                cout << "WRONG FORMAT" << endl;
-                continue;
-            }
-            cout << twitty.mostFollowed();
+                cerr << "WRONG FORMAT" << endl;
+            else
+                twitty.mostFollowed();
+            continue;
         }
 
         if(firstQueryData == "minrt"){
             if(queryData.size != 3)
-            {
-                cout << "WRONG FORMAT" << endl;
-                continue;
-            }
-            cout << twitty.minRetweetCount(queryData.at(1), queryData.at(2));
+                cerr << "WRONG FORMAT" << endl;
+            else
+                cout << twitty.minRetweetCount(queryData.at(1), queryData.at(2)) << endl;
+            continue;
         }
 
         if(firstQueryData == "numgroup"){
             if(queryData.size != 1)
-            {
-                cout << "WRONG FORMAT" << endl;
-                continue;
-            }
-            cout << twitty.getNumGroup();
+                cerr << "WRONG FORMAT" << endl;
+            else
+                cout << twitty.getNumGroup() << endl;
+            continue;
         }
 
         if(firstQueryData == "grouptopic"){
             if(queryData.size != 1)
-            {
-                cout << "WRONG FORMAT" << endl;
-                continue;
-            }
-            twitty.printGroupTopic();
+                cerr << "WRONG FORMAT" << endl;
+            else
+                twitty.printGroupTopic();
             continue;
         }        
-
-        cout << endl;
+        cerr << "WRONG FORMAT" << endl;
     }
-
-    // twitty.printAdjMatrix();
 }
